@@ -1,0 +1,80 @@
+%% LangChain Callback System Architecture
+%% Commit: 990e346
+
+graph TB
+    subgraph Handlers["Callback Handlers"]
+        Base[BaseCallbackHandler]
+        Tracer[LangChainTracer]
+        Console[ConsoleHandler]
+        Custom[CustomHandler]
+    end
+
+    subgraph Events["Event Types"]
+        LLMStart[on_llm_start]
+        LLMEnd[on_llm_end]
+        LLMStream[on_llm_new_token]
+        ChainStart[on_chain_start]
+        ChainEnd[on_chain_end]
+        ToolStart[on_tool_start]
+        ToolEnd[on_tool_end]
+        RetrieverStart[on_retriever_start]
+        RetrieverEnd[on_retriever_end]
+    end
+
+    subgraph Manager["Callback Manager"]
+        CallbackMgr[CallbackManager]
+        RunMgr[RunManager]
+        Child[get_child]
+    end
+
+    subgraph Propagation["Config Propagation"]
+        Config[RunnableConfig]
+        Tags[tags]
+        Meta[metadata]
+        CBs[callbacks]
+    end
+
+    subgraph Destinations["Tracing Destinations"]
+        LangSmith[LangSmith Cloud]
+        Stdout[Console Output]
+        CustomDest[Custom Backend]
+    end
+
+    Config --> CallbackMgr
+    Tags --> CallbackMgr
+    Meta --> CallbackMgr
+    CBs --> CallbackMgr
+
+    CallbackMgr --> RunMgr
+    RunMgr --> Child
+    Child --> RunMgr
+
+    Base --> Tracer
+    Base --> Console
+    Base --> Custom
+
+    CallbackMgr --> LLMStart
+    CallbackMgr --> LLMEnd
+    CallbackMgr --> LLMStream
+    CallbackMgr --> ChainStart
+    CallbackMgr --> ChainEnd
+    CallbackMgr --> ToolStart
+    CallbackMgr --> ToolEnd
+    CallbackMgr --> RetrieverStart
+    CallbackMgr --> RetrieverEnd
+
+    Tracer --> LangSmith
+    Console --> Stdout
+    Custom --> CustomDest
+
+    classDef handler fill:#e1f5fe,stroke:#0277bd
+    classDef event fill:#fff8e1,stroke:#ff8f00
+    classDef manager fill:#f3e5f5,stroke:#7b1fa2
+    classDef config fill:#e8f5e9,stroke:#388e3c
+    classDef dest fill:#fce4ec,stroke:#c2185b
+
+    class Base,Tracer,Console,Custom handler
+    class LLMStart,LLMEnd,LLMStream,ChainStart,ChainEnd,ToolStart,ToolEnd,RetrieverStart,RetrieverEnd event
+    class CallbackMgr,RunMgr,Child manager
+    class Config,Tags,Meta,CBs config
+    class LangSmith,Stdout,CustomDest dest

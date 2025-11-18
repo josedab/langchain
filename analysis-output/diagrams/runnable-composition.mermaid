@@ -1,0 +1,57 @@
+%% LangChain Runnable Composition Patterns
+%% Commit: 990e346
+
+graph LR
+    subgraph Sequential["RunnableSequence (|)"]
+        direction LR
+        S1[Step 1] --> S2[Step 2] --> S3[Step 3]
+    end
+
+    subgraph Parallel["RunnableParallel ({})"]
+        direction TB
+        Input[Input]
+        Input --> P1[Branch 1]
+        Input --> P2[Branch 2]
+        Input --> P3[Branch 3]
+        P1 --> Output[{...}]
+        P2 --> Output
+        P3 --> Output
+    end
+
+    subgraph Branch["RunnableBranch"]
+        direction TB
+        Cond[Condition]
+        Cond -->|True| BT[Then]
+        Cond -->|False| BF[Else]
+    end
+
+    subgraph Fallback["RunnableWithFallbacks"]
+        direction TB
+        Primary[Primary]
+        Primary -->|Error| FB1[Fallback 1]
+        FB1 -->|Error| FB2[Fallback 2]
+    end
+
+    subgraph Lambda["RunnableLambda"]
+        Func["lambda x: f(x)"]
+    end
+
+    subgraph Passthrough["RunnablePassthrough"]
+        direction TB
+        Pass[Input → Output]
+        Assign[".assign(key=fn)"]
+    end
+
+    classDef seq fill:#e3f2fd,stroke:#1565c0
+    classDef par fill:#f3e5f5,stroke:#7b1fa2
+    classDef branch fill:#fff3e0,stroke:#ef6c00
+    classDef fallback fill:#ffebee,stroke:#c62828
+    classDef func fill:#e8f5e9,stroke:#2e7d32
+    classDef pass fill:#fafafa,stroke:#616161
+
+    class S1,S2,S3 seq
+    class P1,P2,P3,Input,Output par
+    class Cond,BT,BF branch
+    class Primary,FB1,FB2 fallback
+    class Func func
+    class Pass,Assign pass

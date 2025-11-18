@@ -1,0 +1,78 @@
+%% LangChain Package Dependencies
+%% Commit: 990e346
+
+graph BT
+    subgraph Core["Core Dependencies"]
+        Pydantic[pydantic ≥2.7.4]
+        LangSmith[langsmith ≥0.3.45]
+        Tenacity[tenacity ≥8.1.0]
+        PyYAML[PyYAML ≥5.3.0]
+        Typing[typing-extensions ≥4.7.0]
+        JSONPatch[jsonpatch ≥1.33.0]
+        Packaging[packaging ≥23.2.0]
+    end
+
+    subgraph LCCore["langchain-core"]
+        Core1[langchain-core v1.0.5]
+    end
+
+    subgraph Utilities["Utility Packages"]
+        TextSplit[langchain-text-splitters]
+        ModelProf[langchain-model-profiles]
+        StdTests[langchain-tests]
+    end
+
+    subgraph Partners["Partner Packages"]
+        OpenAI[langchain-openai]
+        Anthropic[langchain-anthropic]
+        Ollama[langchain-ollama]
+        Chroma[langchain-chroma]
+        Qdrant[langchain-qdrant]
+    end
+
+    subgraph Legacy["Legacy"]
+        Classic[langchain-classic]
+        V1[langchain-v1]
+    end
+
+    subgraph CLI["Tooling"]
+        LCCli[langchain-cli]
+    end
+
+    %% Core dependencies
+    Pydantic --> Core1
+    LangSmith --> Core1
+    Tenacity --> Core1
+    PyYAML --> Core1
+    Typing --> Core1
+    JSONPatch --> Core1
+    Packaging --> Core1
+
+    %% Packages depending on core
+    Core1 --> TextSplit
+    Core1 --> ModelProf
+    Core1 --> StdTests
+
+    Core1 --> OpenAI
+    Core1 --> Anthropic
+    Core1 --> Ollama
+    Core1 --> Chroma
+    Core1 --> Qdrant
+
+    Core1 --> Classic
+    Classic --> V1
+    Classic --> LCCli
+
+    classDef coreDep fill:#e3f2fd,stroke:#1565c0
+    classDef lcCore fill:#1565c0,stroke:#0d47a1,color:#fff
+    classDef util fill:#e8f5e9,stroke:#388e3c
+    classDef partner fill:#f3e5f5,stroke:#7b1fa2
+    classDef legacy fill:#fff3e0,stroke:#ef6c00
+    classDef cli fill:#fce4ec,stroke:#c2185b
+
+    class Pydantic,LangSmith,Tenacity,PyYAML,Typing,JSONPatch,Packaging coreDep
+    class Core1 lcCore
+    class TextSplit,ModelProf,StdTests util
+    class OpenAI,Anthropic,Ollama,Chroma,Qdrant partner
+    class Classic,V1 legacy
+    class LCCli cli

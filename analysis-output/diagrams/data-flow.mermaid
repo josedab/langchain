@@ -1,0 +1,51 @@
+%% LangChain Data Flow Diagram
+%% Commit: 990e346
+
+sequenceDiagram
+    participant User
+    participant Chain as RunnableSequence
+    participant Config as RunnableConfig
+    participant CB as CallbackManager
+    participant Step1 as Prompt Template
+    participant Step2 as Chat Model
+    participant Step3 as Output Parser
+    participant Provider as LLM Provider
+
+    User->>Chain: invoke(input, config)
+
+    Note over Chain,Config: Configuration Phase
+    Chain->>Config: ensure_config(config)
+    Config-->>Chain: Merged config
+    Chain->>CB: get_callback_manager(config)
+    CB-->>Chain: CallbackManager
+
+    Note over Chain,CB: Start Tracking
+    Chain->>CB: on_chain_start(input)
+    CB-->>Chain: RunManager
+
+    Note over Chain,Step3: Sequential Execution
+
+    rect rgb(230, 245, 255)
+        Note over Step1: Step 1: Format Prompt
+        Chain->>Step1: invoke(input)
+        Step1-->>Chain: formatted_prompt
+    end
+
+    rect rgb(255, 243, 224)
+        Note over Step2,Provider: Step 2: Call Model
+        Chain->>Step2: invoke(prompt)
+        Step2->>Provider: API Request
+        Provider-->>Step2: Response
+        Step2-->>Chain: AIMessage
+    end
+
+    rect rgb(232, 245, 233)
+        Note over Step3: Step 3: Parse Output
+        Chain->>Step3: invoke(message)
+        Step3-->>Chain: parsed_result
+    end
+
+    Note over Chain,CB: End Tracking
+    Chain->>CB: on_chain_end(result)
+
+    Chain-->>User: Final Result

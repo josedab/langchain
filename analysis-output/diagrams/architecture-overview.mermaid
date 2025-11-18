@@ -1,0 +1,100 @@
+%% LangChain Architecture Overview
+%% Commit: 990e346
+
+graph TB
+    subgraph UserLayer["User Application Layer"]
+        App[Application Code]
+    end
+
+    subgraph PartnerPackages["Partner Packages"]
+        OpenAI[langchain-openai]
+        Anthropic[langchain-anthropic]
+        Ollama[langchain-ollama]
+        Chroma[langchain-chroma]
+        Qdrant[langchain-qdrant]
+        More[...]
+    end
+
+    subgraph LegacyPackage["Legacy Package"]
+        Classic[langchain-classic]
+        Chains[Chains]
+        Agents[Agents]
+        Memory[Memory]
+    end
+
+    subgraph CorePackage["langchain-core (Foundation)"]
+        subgraph Runnables["Runnables"]
+            Runnable[Runnable Protocol]
+            Sequence[RunnableSequence]
+            Parallel[RunnableParallel]
+            Lambda[RunnableLambda]
+        end
+
+        subgraph Models["Language Models"]
+            BaseLLM[BaseLanguageModel]
+            BaseChatModel[BaseChatModel]
+        end
+
+        subgraph Messages["Messages"]
+            HumanMsg[HumanMessage]
+            AIMsg[AIMessage]
+            ToolMsg[ToolMessage]
+        end
+
+        subgraph Tools["Tools"]
+            BaseTool[BaseTool]
+            ToolDec[@tool decorator]
+        end
+
+        subgraph Callbacks["Callbacks"]
+            CallbackHandler[BaseCallbackHandler]
+            CallbackManager[CallbackManager]
+        end
+
+        subgraph Storage["Storage"]
+            VectorStore[VectorStore]
+            Embeddings[Embeddings]
+            Retriever[BaseRetriever]
+        end
+    end
+
+    subgraph ExternalDeps["External Dependencies"]
+        Pydantic[pydantic v2]
+        LangSmith[langsmith]
+        Tenacity[tenacity]
+    end
+
+    App --> OpenAI
+    App --> Anthropic
+    App --> Classic
+
+    OpenAI --> Runnable
+    Anthropic --> Runnable
+    Ollama --> Runnable
+    Chroma --> VectorStore
+    Qdrant --> VectorStore
+
+    Classic --> Runnable
+    Chains --> Sequence
+    Agents --> BaseTool
+    Memory --> Callbacks
+
+    BaseChatModel --> Runnable
+    BaseLLM --> Runnable
+    BaseTool --> Runnable
+    Retriever --> Runnable
+
+    Runnable --> Callbacks
+    Runnable --> Pydantic
+    CallbackManager --> LangSmith
+    Sequence --> Tenacity
+
+    classDef core fill:#e1f5fe,stroke:#01579b
+    classDef partner fill:#f3e5f5,stroke:#4a148c
+    classDef legacy fill:#fff3e0,stroke:#e65100
+    classDef external fill:#f5f5f5,stroke:#424242
+
+    class Runnable,Sequence,Parallel,Lambda,BaseLLM,BaseChatModel,BaseTool,CallbackHandler,CallbackManager,VectorStore,Embeddings,Retriever,HumanMsg,AIMsg,ToolMsg,ToolDec core
+    class OpenAI,Anthropic,Ollama,Chroma,Qdrant,More partner
+    class Classic,Chains,Agents,Memory legacy
+    class Pydantic,LangSmith,Tenacity external
